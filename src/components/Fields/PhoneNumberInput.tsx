@@ -13,7 +13,13 @@ export const PhoneNumberInput: React.FC = () => {
           name="countryCode"
           control={control}
           defaultValue=""
-          rules={{ required: "Country code is required" }}
+          rules={{
+            required: "Country code is required",
+            pattern: {
+              value: /^\+\d{1,4}$/, // Ensures the country code starts with "+" followed by 1-4 digits
+              message: "Enter a valid country code (e.g., +91)",
+            },
+          }}
           render={({ field, fieldState: { error } }) => (
             <TextField
               {...field}
@@ -22,7 +28,7 @@ export const PhoneNumberInput: React.FC = () => {
               placeholder="+91"
               variant="outlined"
               error={!!error}
-              helperText={error ? error.message : ""}
+              helperText={error ? error.message : "Format: +[Country Code]"}
             />
           )}
         />
@@ -34,7 +40,13 @@ export const PhoneNumberInput: React.FC = () => {
           name="phoneNumber"
           control={control}
           defaultValue=""
-          rules={{ required: "Phone number is required" }}
+          rules={{
+            required: "Phone number is required",
+            pattern: {
+              value: /^\d{7,15}$/, // Validates phone numbers with 7 to 15 digits
+              message: "Enter a valid phone number with 7 to 15 digits",
+            },
+          }}
           render={({ field, fieldState: { error } }) => (
             <TextField
               {...field}
@@ -43,7 +55,7 @@ export const PhoneNumberInput: React.FC = () => {
               placeholder="9898989898"
               variant="outlined"
               error={!!error}
-              helperText={error ? error.message : ""}
+              helperText={error ? error.message : "Enter a valid phone number"}
             />
           )}
         />

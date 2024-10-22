@@ -37,7 +37,7 @@ const Summary: React.FC = () => {
   }
 
   return (
-    <Card>
+    <Card elevation={0}>
       <CardContent>
         <Typography variant="h5" gutterBottom>
           Order Summary

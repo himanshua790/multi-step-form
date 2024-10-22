@@ -17,6 +17,7 @@ import AddressForm from "./AddressFrom";
 import PaymentForm from "./PaymentForm";
 import PersonalForm from "./PersonalForm";
 import Summary from "./Summary";
+import { usePersistentForm } from "../../hooks/usePersistentForm";
 
 type FormFieldNames = keyof FormValues;
 
@@ -29,9 +30,13 @@ const stepImages = [
 ];
 
 const MultipleStepForm = () => {
-  const methods = useForm<FormValues>({
+  // const methods = useForm<FormValues>({
+  //   mode: "onChange",
+  // });
+  const methods = usePersistentForm<FormValues>("multi-step-form", {
     mode: "onChange",
   });
+
   const { trigger } = methods;
   const [step, setStep] = useState(1);
   const theme = useTheme();
@@ -115,13 +120,19 @@ const MultipleStepForm = () => {
 
                 <Grid2
                   size={{ xs: 12, md: 8 }}
-                  sx={{ minWidth: "390px", width: "100%" }}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: 1,
+                    minWidth: "390px",
+                    width: "100%",
+                  }}
                 >
                   {step === 1 && <PersonalForm />}
                   {step === 2 && <AddressForm formName="address" />}
                   {step === 3 && <PaymentForm />}
                   {step === 4 && <Summary />}
-                  <div className="flex mt-5">
+                  <div className="flex mt-auto">
                     {step > 1 && (
                       <Button
                         variant="contained"
@@ -152,7 +163,8 @@ const MultipleStepForm = () => {
                         color="primary"
                         type="submit"
                         sx={{
-                          ml: "auto", // ensure the submit button is on the right
+                          ml: "auto", 
+                          display: "none", // ensure the submit button is on the right
                         }}
                       >
                         Submit

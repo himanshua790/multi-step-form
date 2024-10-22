@@ -1,14 +1,13 @@
-import React, { useCallback, useEffect, useState } from "react";
-import axios from "axios";
-import { Controller, useFormContext } from "react-hook-form";
 import {
   Autocomplete,
-  TextField,
   CircularProgress,
-  Box,
-  Typography,
   Grid2,
+  TextField,
+  Typography
 } from "@mui/material";
+import axios from "axios";
+import React, { useCallback, useEffect, useState } from "react";
+import { Controller, useFormContext } from "react-hook-form";
 import Config from "../../config/rapidApi";
 import { useDebounce } from "../../hooks/useDebounce";
 import { City, Country } from "../../types/Form"; // Import the Country and City types

@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid2, TextField, Typography } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
-import { PhoneNumberInput } from "./Fields/PhoneNumberInput";
+import { PhoneNumberInput } from "../Fields/PhoneNumberInput";
 
 const PersonalForm: React.FC = () => {
   const { control } = useFormContext();
