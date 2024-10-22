@@ -29,6 +29,7 @@ const PersonalForm: React.FC = () => {
           name="firstName"
           control={control}
           rules={{ required: "First name is required" }}
+          defaultValue={"Himanshu"} // TODO: Remove
           render={({ field, fieldState: { error } }) => (
             <TextField
               {...field}
@@ -49,6 +50,7 @@ const PersonalForm: React.FC = () => {
           name="lastName"
           control={control}
           rules={{ required: "Last name is required" }}
+          defaultValue={"Soni"} // TODO: Remove
           render={({ field, fieldState: { error } }) => (
             <TextField
               {...field}
@@ -68,6 +70,7 @@ const PersonalForm: React.FC = () => {
         <Controller
           name="email"
           control={control}
+          defaultValue={"Himanshu@gmail.com"} // TODO: Remove
           rules={{
             required: "Email is required",
             pattern: {

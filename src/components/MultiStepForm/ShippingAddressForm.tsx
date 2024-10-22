@@ -7,6 +7,7 @@ import {
   CircularProgress,
   Box,
   Typography,
+  Grid2,
 } from "@mui/material";
 import Config from "../../config/rapidApi";
 import { useDebounce } from "../../hooks/useDebounce";
@@ -23,6 +24,7 @@ const ShippingAddressForm: React.FC = () => {
   const selectedCountry = watch("country");
   const selectedCity = watch("city");
 
+  // Fetch countries
   const fetchCountries = useCallback(() => {
     const savedCountries = localStorage.getItem("countries");
     if (savedCountries) {
@@ -55,6 +57,11 @@ const ShippingAddressForm: React.FC = () => {
     }
   }, [countries.length, fetchCountries]);
 
+  useEffect(() => {
+    console.log(countries);
+  }, [countries]);
+
+  // Fetch cities when country and city input change
   useEffect(() => {
     if (
       debouncedCityInput &&
@@ -98,94 +105,111 @@ const ShippingAddressForm: React.FC = () => {
   }, [selectedCity]);
 
   return (
-    <Box sx={{ p: 4, border: "1px solid #ddd", borderRadius: 2, boxShadow: 1 }}>
-      <Typography variant="h6" gutterBottom>
-        Country & City Information
-      </Typography>
+    <Grid2 container spacing={2}>
+      {/* Title */}
+      <Grid2 size={12}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            textAlign: "center",
+            marginX: "auto",
+            marginBottom: 2,
+          }}
+        >
+          Shipping Address
+        </Typography>
+      </Grid2>
 
-      {/* Country Autocomplete */}
-      <Controller
-        name="country"
-        control={control}
-        defaultValue={null}
-        render={({ field }) => (
-          <Autocomplete
-            options={countries}
-            getOptionLabel={(option) => option.label}
-            loading={loadingCountries}
-            value={field.value || null}
-            onChange={(_, value) => {
-              field.onChange(value); // Store the entire country object
-              setValue("city", null); // Clear the city when country changes
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Select a Country"
-                variant="outlined"
-                fullWidth
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <>
-                        {loadingCountries ? (
-                          <CircularProgress color="inherit" size={20} />
-                        ) : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  },
-                }}
-              />
-            )}
-          />
-        )}
-      />
-
-      {/* City Autocomplete */}
-      {selectedCountry && (
-        <Box sx={{ mt: 3 }}>
-          <Controller
-            name="city"
-            control={control}
-            defaultValue={null}
-            render={({ field }) => (
-              <Autocomplete
-                options={cities}
-                getOptionLabel={(option) => option.city}
-                loading={loadingCities}
-                inputValue={cityInput}
-                onInputChange={(_, value) => setCityInput(value)}
-                value={field.value || null}
-                onChange={(_, value) => {
-                  field.onChange(value); // Store the entire city object
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Search for a City"
-                    variant="outlined"
-                    fullWidth
-                    slotProps={{
-                      input: {
-                        endAdornment: (
-                          <>
-                            {loadingCities ? (
-                              <CircularProgress color="inherit" size={20} />
-                            ) : null}
-                            {params.InputProps.endAdornment}
-                          </>
-                        ),
-                      },
-                    }}
-                  />
-                )}
-              />
-            )}
-          />
-        </Box>
-      )}
-    </Box>
+      <Grid2 size={12}>
+        {/* Country Autocomplete */}
+        <Controller
+          name="country"
+          control={control}
+          defaultValue={null}
+          render={({ field }) => (
+            <Autocomplete
+              options={countries}
+              getOptionLabel={(option) => option.label}
+              isOptionEqualToValue={(option, value) =>
+                option.value === value?.value
+              }
+              loading={loadingCountries}
+              value={field.value || null}
+              onChange={(_, value) => {
+                field.onChange(value); // Store the entire country object
+                setValue("city", null); // Clear the city when country changes
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Select a Country"
+                  variant="outlined"
+                  fullWidth
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      endAdornment: (
+                        <React.Fragment>
+                          {loadingCountries ? (
+                            <CircularProgress color="inherit" size={20} />
+                          ) : null}
+                          {params.InputProps.endAdornment}
+                        </React.Fragment>
+                      ),
+                    },
+                  }}
+                />
+              )}
+            />
+          )}
+        />
+      </Grid2>
+      <Grid2 size={12}>
+        {/* City Autocomplete */}
+        <Controller
+          name="city"
+          control={control}
+          defaultValue={null}
+          disabled={!selectedCountry}
+          render={({ field }) => (
+            <Autocomplete
+              options={cities}
+              getOptionLabel={(option) => option.city}
+              isOptionEqualToValue={(option, value) => option.id === value?.id}
+              loading={loadingCities}
+              inputValue={cityInput}
+              onInputChange={(_, value) => setCityInput(value)}
+              value={field.value || null}
+              onChange={(_, value) => {
+                field.onChange(value); // Store the entire city object
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search for a City"
+                  variant="outlined"
+                  fullWidth
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {loadingCities ? (
+                            <CircularProgress color="inherit" size={20} />
+                          ) : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    },
+                  }}
+                />
+              )}
+            />
+          )}
+        />
+      </Grid2>
+    </Grid2>
   );
 };
 
