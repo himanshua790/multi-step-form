@@ -11,12 +11,19 @@ import {
 } from "@mui/material";
 import Config from "../../config/rapidApi";
 import { useDebounce } from "../../hooks/useDebounce";
-import { City, Country } from "../../types/Form"; // Import the Country and City types
+import { City, Country } from "../../types/Form";
 
-type ShippingAddressFormProps = {
+type AddressFormProps = {
   isBillingAddress?: boolean;
+  isDisabled?: boolean;
+  formName: "address" | "billingAddress"; // Allows distinguishing between shipping and billing forms
 };
-const ShippingAddressForm: React.FC<ShippingAddressFormProps> = () => {
+
+const AddressForm: React.FC<AddressFormProps> = ({
+  isBillingAddress = false,
+  isDisabled = false,
+  formName,
+}) => {
   const { control, watch, setValue } = useFormContext();
   const [countries, setCountries] = useState<Country[]>([]);
   const [cities, setCities] = useState<City[]>([]);
@@ -24,8 +31,8 @@ const ShippingAddressForm: React.FC<ShippingAddressFormProps> = () => {
   const [loadingCities, setLoadingCities] = useState<boolean>(false);
   const [cityInput, setCityInput] = useState<string>("");
   const debouncedCityInput = useDebounce(cityInput, 1000);
-  const selectedCountry = watch("country");
-  const selectedCity = watch("city");
+  const selectedCountry = watch(`${formName}.country`);
+  const selectedCity = watch(`${formName}.city`);
 
   // Fetch countries
   const fetchCountries = useCallback(() => {
@@ -60,17 +67,9 @@ const ShippingAddressForm: React.FC<ShippingAddressFormProps> = () => {
     }
   }, [countries.length, fetchCountries]);
 
-  useEffect(() => {
-    console.log(countries);
-  }, [countries]);
-
   // Fetch cities when country and city input change
   useEffect(() => {
-    if (
-      debouncedCityInput &&
-      debouncedCityInput.length > 2 &&
-      selectedCountry
-    ) {
+    if (debouncedCityInput && debouncedCityInput.length > 2 && selectedCountry) {
       setLoadingCities(true);
       axios
         .get("https://wft-geo-db.p.rapidapi.com/v1/geo/cities", {
@@ -78,7 +77,7 @@ const ShippingAddressForm: React.FC<ShippingAddressFormProps> = () => {
             "X-RapidAPI-Key": Config.rapidAPIKey,
           },
           params: {
-            countryIds: selectedCountry.value, // Using the country code
+            countryIds: selectedCountry.value,
             namePrefix: debouncedCityInput,
             limit: 10,
           },
@@ -100,7 +99,7 @@ const ShippingAddressForm: React.FC<ShippingAddressFormProps> = () => {
     }
   }, [debouncedCityInput, selectedCountry]);
 
-  // If returning to form, set the city input to selected city's name
+  // Set city input value if returning to form
   useEffect(() => {
     if (selectedCity) {
       setCityInput(selectedCity.city);
@@ -109,25 +108,23 @@ const ShippingAddressForm: React.FC<ShippingAddressFormProps> = () => {
 
   return (
     <Grid2 container spacing={2}>
-      {/* Title */}
       <Grid2 size={12}>
         <Typography
           variant="h5"
           sx={{
             fontWeight: "bold",
             textAlign: "center",
-            marginX: "auto",
             marginBottom: 2,
           }}
         >
-          Shipping Address
+          {isBillingAddress ? "Billing Address" : "Shipping Address"}
         </Typography>
       </Grid2>
 
-      <Grid2 size={12}>
-        {/* Address Input */}
+      {/* Address Input */}
+      <Grid2 size={{xs: 12}}>
         <Controller
-          name=""
+          name={`${formName}.street`}
           control={control}
           defaultValue=""
           rules={{ required: "Address is required", minLength: 5 }}
@@ -137,16 +134,18 @@ const ShippingAddressForm: React.FC<ShippingAddressFormProps> = () => {
               fullWidth
               label="Address"
               variant="outlined"
+              disabled={isDisabled}
               error={!!error}
               helperText={error ? error.message : ""}
             />
           )}
         />
       </Grid2>
+
+      {/* Country Autocomplete */}
       <Grid2 size={12}>
-        {/* Country Autocomplete */}
         <Controller
-          name="country"
+          name={`${formName}.country`}
           control={control}
           defaultValue={null}
           render={({ field }) => (
@@ -159,8 +158,8 @@ const ShippingAddressForm: React.FC<ShippingAddressFormProps> = () => {
               loading={loadingCountries}
               value={field.value || null}
               onChange={(_, value) => {
-                field.onChange(value); // Store the entire country object
-                setValue("city", null); // Clear the city when country changes
+                field.onChange(value);
+                setValue(`${formName}.city`, null);
               }}
               renderInput={(params) => (
                 <TextField
@@ -168,32 +167,32 @@ const ShippingAddressForm: React.FC<ShippingAddressFormProps> = () => {
                   label="Select a Country"
                   variant="outlined"
                   fullWidth
+                  disabled={isDisabled}
                   slotProps={{
                     input: {
-                      ...params.InputProps,
-                      endAdornment: (
-                        <React.Fragment>
-                          {loadingCountries ? (
-                            <CircularProgress color="inherit" size={20} />
-                          ) : null}
-                          {params.InputProps.endAdornment}
-                        </React.Fragment>
-                      ),
-                    },
-                  }}
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loadingCountries ? (
+                          <CircularProgress color="inherit" size={20} />
+                        ) : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}}
                 />
               )}
             />
           )}
         />
       </Grid2>
+
+      {/* City Autocomplete */}
       <Grid2 size={12}>
-        {/* City Autocomplete */}
         <Controller
-          name="city"
+          name={`${formName}.city`}
           control={control}
           defaultValue={null}
-          disabled={!selectedCountry}
           render={({ field }) => (
             <Autocomplete
               options={cities}
@@ -204,7 +203,7 @@ const ShippingAddressForm: React.FC<ShippingAddressFormProps> = () => {
               onInputChange={(_, value) => setCityInput(value)}
               value={field.value || null}
               onChange={(_, value) => {
-                field.onChange(value); // Store the entire city object
+                field.onChange(value);
               }}
               renderInput={(params) => (
                 <TextField
@@ -230,9 +229,9 @@ const ShippingAddressForm: React.FC<ShippingAddressFormProps> = () => {
             />
           )}
         />
-      </Grid2>
-    </Grid2>
+        </Grid2>
+        </Grid2>
   );
 };
 
-export default ShippingAddressForm;
+export default AddressForm;

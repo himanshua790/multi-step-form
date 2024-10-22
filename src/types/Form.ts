@@ -1,10 +1,19 @@
-export type FormValue = {
+export type FormValues = {
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber?: string; // Optional
-  country: Country | null; // Store entire Country object
-  city: City | null; // Store entire City object
+  address: {
+    street: string;
+    country: Country | null;
+    city: City | null;
+  };
+  billingAddress?: {
+    street: string;
+    country: Country | null;
+    city: City | null;
+  };
+  nameOnCard: string;
   creditCard: string;
   expiryDate: string;
   cvv: string;
